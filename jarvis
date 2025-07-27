@@ -1,0 +1,91 @@
+#!/bin/bash
+
+# 🤖 Jarvis Permanent Launcher
+echo "🤖 Jarvis Permanent Launcher"
+echo "========================"
+
+# Get the directory where this script is located
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+VENV_PATH="$SCRIPT_DIR/.venv"
+
+# Check if virtual environment exists
+if [ ! -d "$VENV_PATH" ]; then
+    echo "❌ Virtual environment not found at $VENV_PATH"
+    echo "📦 Creating virtual environment..."
+    python3 -m venv "$VENV_PATH"
+    echo "✅ Virtual environment created"
+fi
+
+echo "🔧 Activating virtual environment..."
+source "$VENV_PATH/bin/activate"
+
+if [ $? -eq 0 ]; then
+    echo "✅ Virtual environment activated: $VIRTUAL_ENV"
+else
+    echo "❌ Failed to activate virtual environment"
+    exit 1
+fi
+
+echo "📦 Upgrading pip..."
+python3 -m pip install --upgrade pip
+
+echo "📦 Installing/updating requirements..."
+# Check if requirements.txt exists, if not create a basic one
+if [ ! -f "$SCRIPT_DIR/requirements.txt" ]; then
+    echo "📝 Creating basic requirements.txt..."
+    cat > "$SCRIPT_DIR/requirements.txt" << 'EOF'
+# Basic Python packages for GRIP.X project
+requests>=2.28.0
+python-dotenv>=0.19.0
+colorama>=0.4.4
+EOF
+fi
+
+# Install requirements
+python3 -m pip install -r "$SCRIPT_DIR/requirements.txt"
+
+echo "🚀 Starting Jarvis..."
+
+# Check if main Python file exists
+if [ -f "$SCRIPT_DIR/main.py" ]; then
+    python3 "$SCRIPT_DIR/main.py" "$@"
+elif [ -f "$SCRIPT_DIR/jarvis.py" ]; then
+    python3 "$SCRIPT_DIR/jarvis.py" "$@"
+elif [ -f "$SCRIPT_DIR/app.py" ]; then
+    python3 "$SCRIPT_DIR/app.py" "$@"
+else
+    echo "📝 Creating basic main.py file..."
+    cat > "$SCRIPT_DIR/main.py" << 'EOF'
+#!/usr/bin/env python3
+"""
+GRIP.X Jarvis - AI Assistant
+"""
+
+import sys
+import os
+from pathlib import Path
+
+def main():
+    print("🤖 GRIP.X Jarvis AI Assistant")
+    print("=" * 40)
+    print("Welcome to Jarvis!")
+    print("This is the basic structure for your AI assistant.")
+    print()
+    print("To extend this project, you can:")
+    print("- Add speech recognition capabilities")
+    print("- Integrate with AI APIs (OpenAI, etc.)")
+    print("- Add voice synthesis")
+    print("- Create task automation features")
+    print()
+    print("Virtual environment is active and ready for development!")
+    print(f"Python version: {sys.version}")
+    print(f"Current directory: {os.getcwd()}")
+
+if __name__ == "__main__":
+    main()
+EOF
+    echo "✅ Created basic main.py file"
+    python3 "$SCRIPT_DIR/main.py" "$@"
+fi
+
+echo "🎯 Jarvis session completed."
